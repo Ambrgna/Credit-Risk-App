@@ -1,0 +1,81 @@
+    <div class="card shadow m-5">
+        <div class="card-header py-3">
+            <p class=" m-0 fw-bold">Loan Information</p>
+        </div>
+        <div class="card-body">
+            <form [formGroup]="loanForm" (ngSubmit)="submitLoan()">
+
+                <ng-container *ngFor="let group of inputGroups">
+                    <h5 class="mt-3">{{ group.name }}</h5>
+                    <div class="row g-3 align-items-center">
+                  
+                      <div class="col-6 d-flex flex-column justify-content-center" *ngFor="let input of group.inputs">
+                        <ng-container [ngSwitch]="input.type">
+                  
+                          <!-- Number input -->
+                          <div *ngSwitchCase="'number'" class="mb-3 position-relative">
+                            <label class="mb-1">{{input.label}}</label>
+                            <input 
+                              type="number" 
+                              [formControlName]="input.name" 
+                              class="form-control" 
+                              [ngClass]="{'is-invalid': loanForm.get(input.name)?.invalid && loanForm.get(input.name)?.touched}"
+                            >
+                            <div class="invalid-feedback position-absolute" style="bottom: -1.25rem;">
+                                <ng-container *ngIf="loanForm.get(input.name)?.errors as errors">
+                                  <span *ngIf="errors['required']">{{input.label}} is required.</span>
+                                  <span *ngIf="errors['min']">{{input.label}} must be at least {{errors['min'].min}}.</span>
+                                  <span *ngIf="errors['max']">{{input.label}} cannot be more than {{errors['max'].max}}.</span> 
+                                  <span *ngIf="errors['greaterThanAge']">{{input.label}} cannot be greater than Age.</span>
+                                </ng-container>
+                              </div>
+                            </div>
+                  
+                          <!-- Enum / select -->
+                          <div *ngSwitchCase="'enum'" class="mb-3 position-relative">
+                            <label class="mb-1">{{input.label}}</label>
+                            <select 
+                              [formControlName]="input.name" 
+                              class="form-select"
+                              [ngClass]="{'is-invalid': loanForm.get(input.name)?.invalid && loanForm.get(input.name)?.touched}"
+                            >
+                              <option value="" disabled selected>Select {{input.label}}</option>
+                              <option *ngFor="let option of input.options" [value]="option">{{ formatEnum(option) }}</option>
+                            </select>
+                            <div class="invalid-feedback position-absolute" style="bottom: -1.25rem;">
+                              Please select {{input.label}}.
+                            </div>
+                          </div>
+                  
+                          <!-- Binary / checkbox -->
+                          <div *ngSwitchCase="'binary'" class="d-flex flex-column mb-3 position-relative">
+                            <label class="form-label mb-1">{{input.label}}</label>
+                            <div class="form-check form-switch d-flex align-items-center" style="height:38px;">
+                              <input 
+                                type="checkbox" 
+                                [formControlName]="input.name" 
+                                class="form-check-input" 
+                                id="{{input.name}}"
+                                [ngClass]="{'is-invalid': loanForm.get(input.name)?.invalid && loanForm.get(input.name)?.touched}"
+                              >
+                              <label class="form-check-label ms-2 mb-0" for="{{input.name}}">
+                                {{ loanForm.get(input.name)?.value ? 'Yes' : 'No' }}
+                              </label>
+                              <div class="invalid-feedback position-absolute" style="bottom: -1.25rem;">
+                                {{input.label}} is required.
+                              </div>
+                            </div>
+                          </div>
+                  
+                        </ng-container>
+                      </div>
+                  
+                    </div>
+                  </ng-container>
+                  
+              
+                <button type="submit" class="btn btn-primary mt-3">Submit</button>
+              </form>
+              
+        </div>
+    </div>
