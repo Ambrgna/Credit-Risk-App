@@ -1,0 +1,33 @@
+<div class="card-footer">
+    <!-- Loading -->
+    <div *ngIf="loadingModel1 || loadingModel2" class="text-center mb-2">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div> Calculating...
+    </div>
+  
+    <!-- Mini dashboard row -->
+    <div class="row">
+      <!-- Model 1 -->
+      <div class="col-md-4 mb-2" *ngIf="model1Result !== null">
+        <div [ngClass]="getAlertClass(model1Result)" class="alert mb-1">
+          <strong>Model 1:</strong> {{ getPredictionLabel(model1Result) }} ({{ model1Result | number:'1.0-2' }}%)
+        </div>
+        <img *ngIf="model1Image" [src]="model1Image" alt="Model 1 placement" class="img-fluid border rounded">
+      </div>
+  
+      <!-- Model 2 -->
+      <div class="col-md-4 mb-2" *ngIf="model2Result !== null">
+        <div [ngClass]="getAlertClass(model2Result)" class="alert mb-1">
+          <strong>Model 2:</strong> {{ getPredictionLabel(model2Result) }} ({{ model2Result | number:'1.0-2' }}%)
+        </div>
+        <img *ngIf="model2Image" [src]="model2Image" alt="Model 2 placement" class="img-fluid border rounded">
+      </div>
+  
+      <!-- Average -->
+      <div class="col-md-4 mb-2" *ngIf="getAverageResult() !== null">
+        <div [ngClass]="getAverageAlertClass()" class="alert mb-1">
+          <strong>Average:</strong> {{ getAverageLabel() }} ({{ getAverageResult() | number:'1.0-2' }}%)
+        </div>
+      </div>
+    </div>
+  </div>
+  
