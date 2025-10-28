@@ -137,8 +137,6 @@ export class Form implements OnInit {
       ]
     });
 
-    this.loanForm.get('loan_percentincome')?.disable();
-
     this.loanForm.get('loan_amnt')?.valueChanges.subscribe(() => this.updateLoanPercentIncome());
     this.loanForm.get('person_income')?.valueChanges.subscribe(() => this.updateLoanPercentIncome());
   }
@@ -181,8 +179,15 @@ export class Form implements OnInit {
 
   submitLoan() {
     if (this.loanForm.valid) {
+      console.log(this.loanForm.value);
+      this.updateLoanPercentIncome();
+    
       const loan: Loan = this.loanForm.value;
-      this.api.getLoanStatus(loan).subscribe({
+      this.api.getModel1Prediction(loan).subscribe({
+        next: res => console.log('Loan submitted:', res),
+        error: err => console.error(err)
+      });
+      this.api.getModel2Prediction(loan).subscribe({
         next: res => console.log('Loan submitted:', res),
         error: err => console.error(err)
       });
