@@ -33,10 +33,10 @@ export class Form implements OnInit {
       {
         name: 'Personal Info',
         inputs: [
-          { name: 'person_age', type: 'number', label: 'Age' },
-          { name: 'person_income', type: 'number', label: 'Annual Income' },
+          { name: 'person_age', type: 'number', label: 'Age', step: 1, min: 0},
+          { name: 'person_income', type: 'number', label: 'Annual Income', step: 1, min: 0 },
           { name: 'person_homeownership', type: 'enum', label: 'Home Ownership', options: this.homeOwnershipOptions },
-          { name: 'person_emplength', type: 'number', label: 'Employment Length (years)' }
+          { name: 'person_emplength', type: 'number', label: 'Employment Length (years)', step: 1, min: 0}
         ]
       },
       {
@@ -44,39 +44,48 @@ export class Form implements OnInit {
         inputs: [
           { name: 'loan_intent', type: 'enum', label: 'Loan Intent', options: this.loanIntentOptions },
           { name: 'loan_grade', type: 'enum', label: 'Loan Grade', options: this.loanGradeOptions },
-          { name: 'loan_amnt', type: 'number', label: 'Loan Amount' },
-          { name: 'loan_intrate', type: 'number', label: 'Interest Rate' },
-          { name: 'loan_percentincome', type: 'number', label: 'Percent of Income' }
+          { name: 'loan_amnt', type: 'number', label: 'Loan Amount', step: 1, min: 0 },
+          { name: 'loan_intrate', type: 'number', label: 'Interest Rate', step: .01, min: 0 },
+          { name: 'loan_percentincome', type: 'number', label: 'Percent of Income', step: 1, min: 0, max:100 }
         ]
       },
       {
         name: 'Credit Info',
         inputs: [
           { name: 'defaultonfile', type: 'binary', label: 'Historical Default' },
-          { name: 'credhistlength', type: 'number', label: 'Credit History Length' }
+          { name: 'credhistlength', type: 'number', label: 'Credit History Length (years)', step: 1, min: 0,  }
         ]
       }
     ];
     
     this.loanForm = this.fb.group({
-      person_age: [null, [Validators.required, Validators.min(18)]],
-      person_income: [null, [Validators.required, Validators.min(0)]],
+      person_age: [null, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
+      person_income: [null, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
       person_homeownership: [null, Validators.required],
       person_emplength: [
         null,
         [
           Validators.required,
           Validators.min(0),
-          this.employmentLengthValidator('person_age') 
+          Validators.pattern(/^\d+$/),
+          this.lengthValidator('person_age') 
         ]
       ],
       loan_intent: [null, Validators.required],
       loan_grade: [null, Validators.required],
-      loan_amnt: [null, [Validators.required, Validators.min(0)]],
+      loan_amnt: [null, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
       loan_intrate: [null, [Validators.required, Validators.min(0)]],
-      loan_percentincome: [null, [Validators.required, Validators.min(0), Validators.max(100)]],
+      loan_percentincome: [null, [Validators.required, Validators.min(0)]],
       defaultonfile: [false, Validators.required],
-      credhistlength: [null, [Validators.required, Validators.min(0)]]
+      credhistlength: [
+        null, 
+        [
+          Validators.required, 
+          Validators.min(0),
+          Validators.pattern(/^\d+$/),
+          this.lengthValidator('person_age') 
+        ]
+      ]
     });
   }
 
@@ -88,8 +97,7 @@ export class Form implements OnInit {
       .join(' ');
   }
 
-  // employment length ≤ age
-  employmentLengthValidator(ageControlName: string): ValidatorFn {
+  lengthValidator(ageControlName: string): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.parent) return null;
 
@@ -105,7 +113,6 @@ export class Form implements OnInit {
       return null;
     };
   }
-
 
   submitLoan() {
     if (this.loanForm.valid) {

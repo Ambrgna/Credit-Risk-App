@@ -20,12 +20,16 @@
                               [formControlName]="input.name" 
                               class="form-control" 
                               [ngClass]="{'is-invalid': loanForm.get(input.name)?.invalid && loanForm.get(input.name)?.touched}"
+                              [step]="input.step"
+                              [min]="input.min"
+                              [max]="input.max"
                             >
                             <div class="invalid-feedback position-absolute" style="bottom: -1.25rem;">
                                 <ng-container *ngIf="loanForm.get(input.name)?.errors as errors">
                                   <span *ngIf="errors['required']">{{input.label}} is required.</span>
                                   <span *ngIf="errors['min']">{{input.label}} must be at least {{errors['min'].min}}.</span>
                                   <span *ngIf="errors['max']">{{input.label}} cannot be more than {{errors['max'].max}}.</span> 
+                                  <span *ngIf="errors['pattern']">{{input.label}} must be whole number.</span> 
                                   <span *ngIf="errors['greaterThanAge']">{{input.label}} cannot be greater than Age.</span>
                                 </ng-container>
                               </div>
