@@ -3,13 +3,12 @@
             <p class=" m-0 fw-bold">Loan Information</p>
         </div>
         <div class="card-body">
-            <form [formGroup]="loanForm" (ngSubmit)="submitLoan()">
+            <form [formGroup]="loanForm" (ngSubmit)="submitLoan()" class="row g-3 needs-validation">
 
                 <ng-container *ngFor="let group of inputGroups">
                     <h5 class="mt-3">{{ group.name }}</h5>
-                    <div class="row g-3 align-items-center">
                   
-                      <div class="col-3 d-flex flex-column justify-content-center" *ngFor="let input of group.inputs">
+                      <div class="col-md-3" *ngFor="let input of group.inputs">
                         <label class="form-label mb-1 d-flex align-items-center">
                           {{input.label}}
                           <span 
@@ -26,71 +25,72 @@
                         <ng-container [ngSwitch]="input.type">
                   
                           <!-- Number input -->
-                          <div *ngSwitchCase="'number'" class="mb-3 position-relative">
-                            
-                            <div class="input-group">
-                              <span
-                                *ngIf="input.unit && input.unit === '$'"
-                                class="input-group-text"
-                              >
-                                {{ input.unit }}
-                              </span>
-                              <input 
-                                type="number" 
-                                [formControlName]="input.name" 
-                                class="form-control" 
-                                [ngClass]="{'is-invalid': loanForm.get(input.name)?.invalid && loanForm.get(input.name)?.touched}"
+                          <div *ngSwitchCase="'number'" class="mb-3">                            
+                            <div class="input-group has-validation">
+                              <span *ngIf="input.unit && input.unit === '$'" class="input-group-text">{{ input.unit }}</span>
+
+                              <input
+                                type="number"
+                                [formControlName]="input.name"
+                                class="form-control"
+                                [ngClass]="{
+                                  'is-invalid': loanForm.get(input.name)?.invalid && loanForm.get(input.name)?.touched,
+                                  'is-valid': loanForm.get(input.name)?.valid && loanForm.get(input.name)?.touched
+                                }"
                                 [step]="input.step"
                                 [min]="input.min"
                                 [max]="input.max"
-                              >
-                              <span
-                                *ngIf="input.unit && input.unit !== '$'"
-                                class="input-group-text"
-                              >
-                                {{ input.unit }}
-                              </span>
-                            </div>
-                            <div class="invalid-feedback position-absolute" style="bottom: -1.25rem;">
+                              />
+                              <span *ngIf="input.unit && input.unit !== '$'" class="input-group-text">{{ input.unit }}</span>
+                            
+
+                              <div class="invalid-feedback">
                                 <ng-container *ngIf="loanForm.get(input.name)?.errors as errors">
                                   <span *ngIf="errors['required']">{{input.label}} is required.</span>
                                   <span *ngIf="errors['min']">{{input.label}} must be at least {{errors['min'].min}}.</span>
-                                  <span *ngIf="errors['max']">{{input.label}} cannot be more than {{errors['max'].max}}.</span> 
-                                  <span *ngIf="errors['pattern']">{{input.label}} must be whole number.</span> 
+                                  <span *ngIf="errors['max']">{{input.label}} cannot be more than {{errors['max'].max}}.</span>
+                                  <span *ngIf="errors['pattern']">{{input.label}} must be a whole number.</span>
                                   <span *ngIf="errors['greaterThanAge']">{{input.label}} cannot be greater than Age.</span>
                                 </ng-container>
                               </div>
                             </div>
+                          </div>
                   
                           <!-- Enum / select -->
-                          <div *ngSwitchCase="'enum'" class="mb-3 position-relative">
+                          <div *ngSwitchCase="'enum'" class="mb-3">
                             <select 
                               [formControlName]="input.name" 
                               class="form-select"
-                              [ngClass]="{'is-invalid': loanForm.get(input.name)?.invalid && loanForm.get(input.name)?.touched}"
+                                [ngClass]="{
+                                  'is-invalid': loanForm.get(input.name)?.invalid && loanForm.get(input.name)?.touched,
+                                  'is-valid': loanForm.get(input.name)?.valid && loanForm.get(input.name)?.touched
+                                }"
                             >
                               <option value="" disabled selected>Select {{input.label}}</option>
                               <option *ngFor="let option of input.options" [value]="option">{{ formatEnum(option) }}</option>
                             </select>
-                            <div class="invalid-feedback position-absolute" style="bottom: -1.25rem;">
+                            <div class="invalid-feedback d-block" *ngIf="loanForm.get(input.name)?.invalid && loanForm.get(input.name)?.touched">
                               Please select {{input.label}}.
                             </div>
                           </div>
                   
                           <!-- Binary / checkbox -->
-                          <div *ngSwitchCase="'binary'" class="d-flex flex-column mb-3 position-relative">
+                          <div *ngSwitchCase="'binary'" class="d-flex flex-column mb-3">
                             <div class="form-check form-switch d-flex align-items-center" style="height:38px;">
                               <input 
                                 type="checkbox" 
                                 [formControlName]="input.name" 
                                 class="form-check-input" 
                                 id="{{input.name}}"
-                                [ngClass]="{'is-invalid': loanForm.get(input.name)?.invalid && loanForm.get(input.name)?.touched}"
+                                [ngClass]="{
+                                  'is-invalid': loanForm.get(input.name)?.invalid && loanForm.get(input.name)?.touched,
+                                  'is-valid': loanForm.get(input.name)?.valid && loanForm.get(input.name)?.touched
+                                }"
                               >
                               <label class="form-check-label ms-2 mb-0" for="{{input.name}}">
                                 {{ loanForm.get(input.name)?.value ? 'Yes' : 'No' }}
                               </label>
-                              <div class="invalid-feedback position-absolute" style="bottom: -1.25rem;">
+                              <div class="invalid-feedback d-block" *ngIf="loanForm.get(input.name)?.invalid && loanForm.get(input.name)?.touched">
                                 {{input.label}} is required.
                               </div>
                             </div>
@@ -99,14 +99,14 @@
                         </ng-container>
                       </div>
                   
-                    </div>
                   </ng-container>
+
                   
               
-                <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                <button type="submit" class="btn btn-primary mt-3" [disabled]="!this.loanForm.valid">Submit</button>
               </form>
               
         </div>
 
-          <app-card-footer></app-card-footer>
+          <app-card-footer [modelResults]="modelResults"></app-card-footer>
     </div>

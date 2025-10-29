@@ -34,24 +34,24 @@ class Loan(BaseModel):
 # Mock ML model prediction
 @app.post("/predict/model1")
 def predict_model1(loan: Loan):
-    name = ""
-    result = ""
-    accuracy = 0
+    name = loan.person_homeownership
+    result = loan.person_emplength
+    accuracy = loan.person_income
 
     return {
-        "model_name": name,
-        "model_result": result,
-        "model_accuracy": accuracy
+        "name": name,
+        "result": result,
+        "accuracy": accuracy
         }
 
 @app.post("/predict/model2")
 def predict_model2(loan: Loan):
-    name = ""
-    result = 0
-    accuracy = 0
+    name = loan.loan_intent
+    result = loan.person_homeownership
+    accuracy = loan.person_age*2
 
     return {
-        "model_name": name,
-        "model_result": result,
-        "model_accuracy": accuracy
+        "name": name,
+        "result": result,
+        "accuracy": accuracy
         }

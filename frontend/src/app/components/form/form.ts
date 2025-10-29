@@ -27,6 +27,10 @@ export class Form implements OnInit {
 
   inputGroups: any[] = []; 
   
+  model1Result: any = null;
+  model2Result: any = null;
+  modelResults: any[] = [];
+  
   constructor(private fb: FormBuilder, private api: Api) {}
 
   ngAfterViewInit() {
@@ -60,7 +64,7 @@ export class Form implements OnInit {
             type: 'number', 
             label: 'Employment Length', 
             step: 1, 
-            min: 1,
+            min: 0,
             unit: "yrs",
             tooltip: 'Total number of years you have been employed.'
           }
@@ -137,6 +141,8 @@ export class Form implements OnInit {
       ]
     });
 
+    this.loanForm.get('loan_percentincome')?.disable();
+
     this.loanForm.get('loan_amnt')?.valueChanges.subscribe(() => this.updateLoanPercentIncome());
     this.loanForm.get('person_income')?.valueChanges.subscribe(() => this.updateLoanPercentIncome());
   }
@@ -161,6 +167,8 @@ export class Form implements OnInit {
   }
 
   lengthValidator(ageControlName: string): ValidatorFn {
+    let subscribed = false;
+
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.parent) return null;
 
@@ -170,6 +178,13 @@ export class Form implements OnInit {
       const age = ageControl.value;
       const emplength = control.value;
 
+      if (!subscribed) {
+        subscribed = true;
+        ageControl.valueChanges.subscribe(() => {
+          control.updateValueAndValidity({ onlySelf: true });
+        });
+      }
+
       if (emplength != null && age != null && emplength > age) {
         return { greaterThanAge: true };
       }
@@ -178,17 +193,18 @@ export class Form implements OnInit {
   }
 
   submitLoan() {
+    this.modelResults = [];
     if (this.loanForm.valid) {
       console.log(this.loanForm.value);
-      this.updateLoanPercentIncome();
     
-      const loan: Loan = this.loanForm.value;
+      const loan: Loan = this.loanForm.getRawValue();
       this.api.getModel1Prediction(loan).subscribe({
-        next: res => console.log('Loan submitted:', res),
+        next: res => this.modelResults.push(res),
         error: err => console.error(err)
       });
+
       this.api.getModel2Prediction(loan).subscribe({
-        next: res => console.log('Loan submitted:', res),
+        next: res => this.modelResults.push(res),
         error: err => console.error(err)
       });
     } else {
