@@ -42,6 +42,7 @@ class Loan(BaseModel):
 @app.post("/predict/model1")
 def predict_model1(loan: Loan):
     df = pd.read_csv('CreditDataCleanOHEVer.csv')
+    df.columns = df.columns.str.strip()
 
     X = df.drop('loan_status', axis=1)
     y = df['loan_status']
@@ -164,7 +165,11 @@ def predict_model1(loan: Loan):
         cb_person_default_on_file_Y
     ]], columns=X.columns)
 
-    predicted_status = model.predict(example)[0]
+    # Scale the form data
+    example_scaled = scaler.transform(example)
+
+    # Predict
+    predicted_status = model.predict(example_scaled)[0]
     
     return {
         "name": name,
