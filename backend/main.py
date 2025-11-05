@@ -68,7 +68,7 @@ def predict_model1(loan: Loan):
     person_emp_length = loan.person_emplength
     loan_amnt = loan.loan_amnt
     loan_int_rate = loan.loan_intrate
-    loan_percent_income = loan.loan_percentincome
+    loan_percent_income = loan.loan_percentincome/100
     cb_person_cred_hist_length = loan.credhistlength
 
     person_home_ownership_MORTGAGE = 0
@@ -165,11 +165,11 @@ def predict_model1(loan: Loan):
     ]], columns=X.columns)
 
     predicted_status = model.predict(example)[0]
-
+    
     return {
         "name": name,
-        "result": predicted_status,
-        "accuracy": accuracy
+        "result": int(predicted_status),
+        "accuracy": float(accuracy) * 100
         }
 
 @app.post("/predict/model2")

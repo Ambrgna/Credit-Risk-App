@@ -152,7 +152,7 @@ export class Form implements OnInit {
   
     if (loanAmount != null && income > 0) {
       const percent = (loanAmount / income) * 100;
-      this.loanForm.get('loan_percentincome')?.setValue(Number(percent.toFixed(2)), { emitEvent: false });
+      this.loanForm.get('loan_percentincome')?.setValue(Number(percent.toFixed(0)), { emitEvent: false });
     } else {
       this.loanForm.get('loan_percentincome')?.setValue(null, { emitEvent: false });
     }
