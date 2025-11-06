@@ -38,31 +38,7 @@ class Loan(BaseModel):
     defaultonfile: bool
     credhistlength: int
 
-# Mock ML model prediction
-@app.post("/predict/model1")
-def predict_model1(loan: Loan):
-    df = pd.read_csv('CreditDataCleanOHEVer.csv')
-    df.columns = df.columns.str.strip()
-
-    X = df.drop('loan_status', axis=1)
-    y = df['loan_status']
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-
-    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3)
-
-    # Train logistic regression model
-    model = LogisticRegression(solver="saga", max_iter=2000)
-    model.fit(X_train, y_train)
-
-    # Predict
-    y_pred = model.predict(X_test)
-
-    # Accuracy
-    accuracy = accuracy_score(y_test, y_pred)
-    # Name of Model
-    name = "Linear Regression"
-    
+def covertFormData(loan: Loan,columns):
     # Model Prediction
     person_age = loan.person_age
     person_income = loan.person_income
@@ -136,7 +112,7 @@ def predict_model1(loan: Loan):
     else:
         cb_person_default_on_file_N = 1
 
-    example = pd.DataFrame([[
+    return pd.DataFrame([[
         person_age,
         person_income,
         person_emp_length,
@@ -163,17 +139,63 @@ def predict_model1(loan: Loan):
         loan_grade_G,
         cb_person_default_on_file_N,
         cb_person_default_on_file_Y
-    ]], columns=X.columns)
+    ]], columns=columns)
+
+
+# Global variables for model and scaler
+model = None
+scaler = None
+
+def train_linear_model():
+    df = pd.read_csv('CreditDataCleanOHEVer.csv')
+    df.columns = df.columns.str.strip()
+
+    X = df.drop('loan_status', axis=1)
+    y = df['loan_status']
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3)
+
+    # Train logistic regression model
+    model = LogisticRegression(solver="saga", max_iter=2000)
+    model.fit(X_train, y_train)
+
+    # Predict
+    y_pred = model.predict(X_test)
+
+    # Accuracy
+    accuracy = accuracy_score(y_test, y_pred)
+
+    return model, scaler, X.columns, accuracy
+
+# Train model at startup
+model, scaler, feature_columns, linear_accuracy = train_linear_model()
+
+@app.post("/predict/model1")
+def predict_model1(loan: Loan):
+    global model, scaler, feature_columns, linear_accuracy
+
+    # If model/scaler not loaded for some reason, train again
+    if model is None or scaler is None or feature_columns is None:
+        model, scaler, feature_columns, linear_accuracy = train_linear_model()
+
+    # Accuracy
+    accuracy = linear_accuracy
+    # Name of Model
+    name = "Linear Regression"
+    
+    example = covertFormData(loan,feature_columns)
 
     # Scale the form data
     example_scaled = scaler.transform(example)
 
     # Predict
     predicted_status = model.predict(example_scaled)[0]
-    
+
     return {
         "name": name,
-        "result": int(predicted_status),
+        "result": "Approve" if int(predicted_status) == 0 else "Rejected",
         "accuracy": float(accuracy) * 100
         }
 
