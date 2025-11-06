@@ -1,0 +1,34 @@
+/* Footer inner container */
+.footer-content {
+    text-align: center;
+    color: #333;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* space between items */
+}
+
+/* GitHub link style */
+.github-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.github-link svg {
+    fill: #333;
+    transition: fill 0.3s;
+}
+
+/* Hover effect */
+.github-link:hover {
+    color: #000;
+}
+
+.github-link:hover svg {
+    fill: #000; /* darken GitHub logo on hover */
+}

@@ -1,22 +1,13 @@
 <div class="card-footer" *ngIf="modelResults!==undefined&&modelResults.length>=1">
-  
-    <!-- Mini dashboard row -->
     <div class="row">
       <ng-container *ngFor="let model of modelResults">
         <div class="col-md mb-2" *ngIf="model !== null">
-          <div [ngClass]="getAlertClass(model.accuracy)" class="alert mb-1">
+          <div [ngClass]="getAlertClass(model.result)" class="alert mb-1">
             <strong>{{model.name}}:</strong> {{model.result}} ({{ model.accuracy | number:'1.0-2' }}%)
           </div>
           <img *ngIf="model1Image" [src]="model1Image" alt="Model 1 placement" class="img-fluid border rounded">
         </div>
       </ng-container>
-  
-      <!-- Average -->
-      <div class="col-md mb-2" *ngIf="getAverageResult() !== null">
-        <div [ngClass]="getAverageAlertClass()" class="alert mb-1">
-          <strong>Average:</strong> {{ getAverageLabel() }} ({{ getAverageResult() | number:'1.0-2' }}%)
-        </div>
-      </div>
     </div>
   </div>
   
