@@ -12,12 +12,8 @@ export class Api {
 
   constructor(private http: HttpClient) {}
 
-  getModel1Prediction(loan: Loan): Observable<any> {
-    return this.http.post(`${this.baseUrl}/predict/model1`, loan);
-  }
-
-  getModel2Prediction(loan: Loan): Observable<any> {
-    return this.http.post(`${this.baseUrl}/predict/model2`, loan);
+  getModelPredictions(loan: Loan): Observable<any> {
+    return this.http.post(`${this.baseUrl}/predict/models`, loan);
   }
 
 }

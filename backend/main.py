@@ -252,8 +252,7 @@ def train_forest_model():
 # Train model at startup
 forest_model, forest_columns, forest_accuracy = train_forest_model()
 
-@app.post("/predict/model1")
-def predict_model1(loan: Loan):
+def predict_linear_model(loan: Loan):
     global linear_model, scaler, linear_columns, linear_accuracy
 
     # If model/scaler not loaded for some reason, train again
@@ -279,8 +278,7 @@ def predict_model1(loan: Loan):
         "accuracy": float(accuracy) * 100
         }
 
-@app.post("/predict/model2")
-def predict_model2(loan: Loan):
+def predict_forest_model(loan: Loan):
     global forest_model, scaler, forest_columns, forest_accuracy
 
     # If model/scaler not loaded for some reason, train again
@@ -302,3 +300,9 @@ def predict_model2(loan: Loan):
         "result": "Approve" if int(predicted_status) == 0 else "Rejected",
         "accuracy": float(accuracy) * 100
         }
+
+@app.post("/predict/models")
+def predict_models(loan: Loan):
+    linear=predict_linear_model(loan)
+    forest=predict_forest_model(loan)
+    return [linear,forest]

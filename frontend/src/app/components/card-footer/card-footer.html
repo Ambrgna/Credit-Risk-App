@@ -1,4 +1,15 @@
-<div class="card-footer" *ngIf="modelResults!==undefined&&modelResults.length>=1">
+<!-- Show loading spinner while waiting for API -->
+<div class="card-footer" *ngIf="modelResults.length==0">
+  <div class="text-center py-3">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 mb-0">Loading results...</p>
+  </div>
+</div>
+
+<!-- Show results when available -->
+<div class="card-footer" *ngIf="modelResults.length >= 1">
     <div class="row">
       <ng-container *ngFor="let model of modelResults">
         <div class="col-md mb-2" *ngIf="model !== null">

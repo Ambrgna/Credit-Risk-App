@@ -8,7 +8,7 @@ import { Component, Input } from '@angular/core';
   styleUrl: './card-footer.css'
 })
 export class CardFooter {  
-@Input() modelResults?: any[];
+@Input() modelResults: any[] = [];
 
 model1Image: string | null = null;
 model2Image: string | null = null;

@@ -30,6 +30,7 @@ export class Form implements OnInit {
   model1Result: any = null;
   model2Result: any = null;
   modelResults: any[] = [];
+  hideResults: boolean = true;
   
   constructor(private fb: FormBuilder, private api: Api) {}
 
@@ -194,17 +195,13 @@ export class Form implements OnInit {
 
   submitLoan() {
     this.modelResults = [];
+    this.hideResults = false;
     if (this.loanForm.valid) {
       console.log(this.loanForm.value);
     
       const loan: Loan = this.loanForm.getRawValue();
-      this.api.getModel1Prediction(loan).subscribe({
-        next: res => this.modelResults.push(res),
-        error: err => console.error(err)
-      });
-
-      this.api.getModel2Prediction(loan).subscribe({
-        next: res => this.modelResults.push(res),
+      this.api.getModelPredictions(loan).subscribe({
+        next: res => this.modelResults=res,
         error: err => console.error(err)
       });
     } else {
