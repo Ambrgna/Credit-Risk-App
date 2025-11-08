@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 
 
 app = FastAPI()
@@ -38,7 +39,7 @@ class Loan(BaseModel):
     defaultonfile: bool
     credhistlength: int
 
-def covertFormData(loan: Loan,columns):
+def covertFormData(loan: Loan, columns, type):
     # Model Prediction
     person_age = loan.person_age
     person_income = loan.person_income
@@ -112,7 +113,15 @@ def covertFormData(loan: Loan,columns):
     else:
         cb_person_default_on_file_N = 1
 
-    return pd.DataFrame([[
+    if type == "forest":
+        loan_grade = (loan_grade_A * 6 +
+                            loan_grade_B * 5 +
+                            loan_grade_C * 4 +
+                            loan_grade_D * 3 +
+                            loan_grade_E * 2 +
+                            loan_grade_F * 1 +
+                            loan_grade_G * 0)
+        return pd.DataFrame([[
         person_age,
         person_income,
         person_emp_length,
@@ -130,20 +139,44 @@ def covertFormData(loan: Loan,columns):
         loan_intent_MEDICAL,
         loan_intent_PERSONAL,
         loan_intent_VENTURE,
-        loan_grade_A,
-        loan_grade_B,
-        loan_grade_C,
-        loan_grade_D,
-        loan_grade_E,
-        loan_grade_F,
-        loan_grade_G,
-        cb_person_default_on_file_N,
-        cb_person_default_on_file_Y
+        loan_grade,
+        cb_person_default_on_file_N
     ]], columns=columns)
+
+    else:
+        return pd.DataFrame([[
+            person_age,
+            person_income,
+            person_emp_length,
+            loan_amnt,
+            loan_int_rate,
+            loan_percent_income,
+            cb_person_cred_hist_length,
+            person_home_ownership_MORTGAGE,
+            person_home_ownership_OTHER,
+            person_home_ownership_OWN,
+            person_home_ownership_RENT,
+            loan_intent_DEBTCONSOLIDATION,
+            loan_intent_EDUCATION,
+            loan_intent_HOMEIMPROVEMENT,
+            loan_intent_MEDICAL,
+            loan_intent_PERSONAL,
+            loan_intent_VENTURE,
+            loan_grade_A,
+            loan_grade_B,
+            loan_grade_C,
+            loan_grade_D,
+            loan_grade_E,
+            loan_grade_F,
+            loan_grade_G,
+            cb_person_default_on_file_N,
+            cb_person_default_on_file_Y
+        ]], columns=columns)
 
 
 # Global variables for model and scaler
-model = None
+linear_model = None
+forest_model = None
 scaler = None
 
 def train_linear_model():
@@ -158,40 +191,87 @@ def train_linear_model():
     X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3)
 
     # Train logistic regression model
-    model = LogisticRegression(solver="saga", max_iter=2000)
-    model.fit(X_train, y_train)
+    linear_model = LogisticRegression(solver="saga", max_iter=2000)
+    linear_model.fit(X_train, y_train)
 
     # Predict
-    y_pred = model.predict(X_test)
+    y_pred = linear_model.predict(X_test)
 
     # Accuracy
     accuracy = accuracy_score(y_test, y_pred)
 
-    return model, scaler, X.columns, accuracy
+    return linear_model, scaler, X.columns, accuracy
 
 # Train model at startup
-model, scaler, feature_columns, linear_accuracy = train_linear_model()
+linear_model, scaler, linear_columns, linear_accuracy = train_linear_model()
+
+def train_forest_model():
+    crdata = pd.read_csv('CreditDataCleanOHEVer.csv')
+    crdata.columns = crdata.columns.str.strip()
+
+    crdata['loan_grade'] = (crdata['loan_grade_A'] * 6 +
+                            crdata['loan_grade_B'] * 5 +
+                            crdata['loan_grade_C'] * 4 +
+                            crdata['loan_grade_D'] * 3 +
+                            crdata['loan_grade_E'] * 2 +
+                            crdata['loan_grade_F'] * 1 +
+                            crdata['loan_grade_G'] * 0)
+    crdata = crdata.drop(['loan_grade_A',
+                      'loan_grade_B',
+                      'loan_grade_C',
+                      'loan_grade_D',
+                      'loan_grade_E',
+                      'loan_grade_F',
+                      'loan_grade_G',], axis=1)
+    crdata = crdata.drop('cb_person_default_on_file_Y', axis=1)
+    
+    # Set up basic model data
+    # Use all features
+    Xb = crdata.drop('loan_status', axis=1)
+
+    # Assuming only 'loan_status' is the target variable
+    yb = crdata['loan_status']
+
+    Xb_train, Xb_test, yb_train, yb_test = train_test_split(
+        Xb,
+        yb,
+        test_size=0.2,
+        random_state=42)
+
+    # Run model, don't need to scale for forest classifiers
+    forest_model = RandomForestClassifier(random_state=42)
+    forest_model.fit(Xb_train, yb_train)
+
+    # Check results
+    yb_pred = forest_model.predict(Xb_test)
+    baccuracy = accuracy_score(yb_test, yb_pred)
+    print(f"Accuracy: {baccuracy}")
+
+    return forest_model, Xb.columns, baccuracy
+
+# Train model at startup
+forest_model, forest_columns, forest_accuracy = train_forest_model()
 
 @app.post("/predict/model1")
 def predict_model1(loan: Loan):
-    global model, scaler, feature_columns, linear_accuracy
+    global linear_model, scaler, linear_columns, linear_accuracy
 
     # If model/scaler not loaded for some reason, train again
-    if model is None or scaler is None or feature_columns is None:
-        model, scaler, feature_columns, linear_accuracy = train_linear_model()
+    if linear_model is None or scaler is None or linear_columns is None:
+        linear_model, scaler, linear_columns, linear_accuracy = train_linear_model()
 
     # Accuracy
     accuracy = linear_accuracy
     # Name of Model
     name = "Linear Regression"
     
-    example = covertFormData(loan,feature_columns)
+    example = covertFormData(loan,linear_columns,"linear")
 
     # Scale the form data
     example_scaled = scaler.transform(example)
 
     # Predict
-    predicted_status = model.predict(example_scaled)[0]
+    predicted_status = linear_model.predict(example_scaled)[0]
 
     return {
         "name": name,
@@ -201,12 +281,24 @@ def predict_model1(loan: Loan):
 
 @app.post("/predict/model2")
 def predict_model2(loan: Loan):
-    name = loan.loan_intent
-    result = loan.person_homeownership
-    accuracy = loan.person_age*2
+    global forest_model, scaler, forest_columns, forest_accuracy
+
+    # If model/scaler not loaded for some reason, train again
+    if forest_model is None or scaler is None or forest_columns is None:
+        forest_model, scaler, forest_columns, forest_accuracy = train_linear_model()
+
+    # Accuracy
+    accuracy = forest_accuracy
+    # Name of Model
+    name = "Random Forest"
+    
+    example = covertFormData(loan,forest_columns,"forest")
+
+    # Predict
+    predicted_status = forest_model.predict(example)[0]
 
     return {
         "name": name,
-        "result": result,
-        "accuracy": accuracy
+        "result": "Approve" if int(predicted_status) == 0 else "Rejected",
+        "accuracy": float(accuracy) * 100
         }
