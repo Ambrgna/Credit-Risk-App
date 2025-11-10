@@ -262,7 +262,7 @@ def predict_linear_model(loan: Loan):
     # Accuracy
     accuracy = linear_accuracy
     # Name of Model
-    name = "Linear Regression"
+    name = "Logistic Regression"
     
     example = covertFormData(loan,linear_columns,"linear")
 
