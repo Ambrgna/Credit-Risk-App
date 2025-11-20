@@ -67,7 +67,7 @@ export class Form implements OnInit {
             step: 1, 
             min: 0,
             unit: "yrs",
-            tooltip: 'Total number of years you have been employed.'
+            tooltip: 'Total number of years applicant has been employed.'
           }
         ]
       },
@@ -80,7 +80,7 @@ export class Form implements OnInit {
             type: 'enum', 
             label: 'Loan Grade', 
             options: this.loanGradeOptions,
-            tooltip: 'The credit quality category assigned to your loan, based on risk and creditworthiness. Higher grades indicate lower risk.'
+            tooltip: "The credit quality category assigned to applicant's loan, based on risk and creditworthiness. Higher grades indicate lower risk."
           },
           { name: 'loan_amnt', type: 'number', label: 'Loan Amount', step: 1, min: 1 },
           { name: 'loan_intrate', type: 'number', label: 'Interest Rate', step: 0.01, min: 0, unit: '%' },
@@ -98,7 +98,7 @@ export class Form implements OnInit {
       {
         name: 'Credit Info',
         inputs: [
-          { name: 'defaultonfile', type: 'binary', label: 'Historical Default', tooltip: 'Have you ever defaulted on a loan before?' },
+          { name: 'defaultonfile', type: 'binary', label: 'Historical Default', tooltip: 'Has applicant ever defaulted on a loan before?' },
           { 
             name: 'credhistlength', 
             type: 'number', 
